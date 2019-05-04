@@ -1,106 +1,128 @@
+/*
+Data structures class assignment. Performs radix_sort sort.  */
+
+
+//Preprocessor directives
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
-/* 
-fila com cabeca e cauda (codigo reaproveitado)
-*/
-typedef struct no {
-    int valor;
-    struct no * prox;
-} no_t;
 
-typedef struct fila {
-    no_t * inicio;
-    no_t * fim;
+//Abstract data types
+typedef struct node
+{
+    int value;
+    struct node *next;
+} Node_t;
+
+
+typedef struct queue
+{
+    Node_t *front;
+    Node_t *rear;
     int length;
-} fila_t;
+} Queue_t;
 
-fila_t * criaFila(){
-    fila_t * novaFila = malloc(sizeof(fila_t));
-    novaFila->fim = NULL;
-    novaFila->inicio = NULL;
-    novaFila->length = 0;
-    return novaFila;
-}
 
-void insere(fila_t * fila, int valor){
-    no_t * novoNo = malloc(sizeof(no_t));
-    novoNo->valor = valor;
-    novoNo->prox = NULL;
-    
-    if(fila->inicio == NULL){
-        fila->inicio = novoNo;
-        fila->fim = novoNo;
-    }else{
-        fila->fim->prox = novoNo;
-        fila->fim = novoNo;        
-    }
-    fila->length++;
-}
+//Declaration
+Queue_t *create_queue();
+void enqueue(Queue_t *queue, int value);
+int dequeue(Queue_t *queue);
+void print_queue(Queue_t *queue);
+void radix_sort(int *vector, int vector_size, int max_digits);
 
-int retira(fila_t * fila){
-   no_t * removido;
-   if(fila->inicio != NULL){
-        removido = fila->inicio;
-        if(fila->fim == fila->inicio){
-            fila->inicio = NULL;
-            fila->fim = NULL;
-        }else{
-            fila->inicio = fila->inicio->prox; 
-        }        
-        fila->length--;
-        int valorRemovido = removido->valor;
-        free(removido);
-        return valorRemovido;
 
-   }else{
-       // underflow
-   }
-}
-
-void imprime(fila_t * fila){
-    no_t * no = fila->inicio;
-    while(no != NULL){
-        printf("%d \n", no->valor);
-        no = no->prox;
-    }
-}
-
-// radix function
-void radix(int * vet, int vetSize, int maxDigits){
-    
-    fila_t * radixVet[10];
-    for(int i = 0; i < 10; i++){
-        radixVet[i] = criaFila();
-    }
-
-    for(int i = 0; i < maxDigits; i++){
-        int base = pow(10, i);
-        for(int j = 0; j < vetSize; j++){
-            int radixInd = (vet[j] % (base * 10)) / base;
-            insere(radixVet[radixInd], vet[j]);
-        }
-        int vetPos = 0;
-        for(int j = 0; j < 10; j++){
-            fila_t * fila = radixVet[j];
-            while(fila->length > 0){
-                vet[vetPos] = retira(fila);
-                vetPos++;
-            }
-        }
-    }
-}
-
-int main(void) {    
+//Main
+int main(void) {
     int vet[] = {1,200,0,45,15,67,7,87,900,0,43343,2423,12122};
     int vetSize = 13;
 
-    radix(vet, vetSize, 5);
-    
+    radix_sort(vet, vetSize, 5);
+
     //results
     for(int i = 0; i < vetSize; i++){
         printf("%d \n", vet[i]);
     }
     return 0;
+}
+
+
+//Definition
+Queue_t * create_queue(){
+    Queue_t * novaFila = malloc(sizeof(Queue_t));
+    novaFila->rear = NULL;
+    novaFila->front = NULL;
+    novaFila->length = 0;
+    return novaFila;
+}
+
+
+void enqueue(Queue_t *queue, int value){
+    Node_t * novoNo = malloc(sizeof(Node_t));
+    novoNo->value = value;
+    novoNo->next = NULL;
+
+    if(queue->front == NULL){
+        queue->front = novoNo;
+        queue->rear = novoNo;
+    }else{
+        queue->rear->next = novoNo;
+        queue->rear = novoNo;
+    }
+    queue->length++;
+}
+
+
+int dequeue(Queue_t *queue){
+    Node_t * removido;
+    if(queue->front != NULL){
+        removido = queue->front;
+        if(queue->rear == queue->front){
+            queue->front = NULL;
+            queue->rear = NULL;
+        }else{
+            queue->front = queue->front->next;
+        }
+        queue->length--;
+        int valorRemovido = removido->value;
+        free(removido);
+        return valorRemovido;
+
+    }else{
+        // underflow
+    }
+}
+
+
+void print_queue(Queue_t *queue){
+    Node_t * no = queue->front;
+    while(no != NULL){
+        printf("%d \n", no->value);
+        no = no->next;
+    }
+}
+
+
+void radix_sort(int *vector, int vector_size, int max_digits){
+
+    Queue_t * radixVet[10];
+    for(int i = 0; i < 10; i++){
+        radixVet[i] = create_queue();
+    }
+
+    for(int i = 0; i < max_digits; i++){
+        int base = pow(10, i);
+        for(int j = 0; j < vector_size; j++){
+            int radixInd = (vector[j] % (base * 10)) / base;
+            enqueue(radixVet[radixInd], vector[j]);
+        }
+        int vetPos = 0;
+        for(int j = 0; j < 10; j++){
+            Queue_t * fila = radixVet[j];
+            while(fila->length > 0){
+                vector[vetPos] = dequeue(fila);
+                vetPos++;
+            }
+        }
+    }
 }
