@@ -10,9 +10,8 @@ O programa deve imprimir, a cada iteração, o estado corrente das b filas, bem 
 lista de elementos a ser ordenada.
     * Considerar b (base) = 10
     * Grupos de 3 pessoas
-    * Apresentação 20/05
-    * As impressoões devem seguir o modelo do livro (página 35)"  */
-
+    * Apresentação 22/05
+    * As impressoões devem seguir o modelo do livro"  */
 
 //Preprocessor directives
 #include <stdio.h>
@@ -20,16 +19,13 @@ lista de elementos a ser ordenada.
 #include <math.h>
 #include <time.h>
 
-#define BASE 10
-
 
 //Abstract data types
 typedef struct node
 {
-    int value;
-    struct node *next;
+    int number;
+    struct node *next_node;
 } Node_t;
-
 
 typedef struct queue
 {
@@ -40,141 +36,206 @@ typedef struct queue
 
 
 //Declaration
-int *create_array(int element_size, int element_amount);
-void print_array(int *array);
+int *create_array(int elem_num, int digit_num);
+void print_array(int *array, int elem_num);
 Queue_t *create_queue();
-void enqueue(Queue_t *queue, int value);
+void enqueue(Queue_t *queue, int number);
 int dequeue(Queue_t *queue);
-void print_queue(Queue_t *queue);
-void radix_sort(int *array, int element_amount, int element_size);
+void print_queues();  //TO-DO
+void radix_sort(int *array, int elem_num, int digit_num);
 
 
 //Main
-int main(void) {
+int main()
+{
+    srand(time(NULL));
+    int elem_num;  //Number of elements; integer array size
+    int digit_num;  //Maximum number of digits of each element
 
-    int element_amount, element_size;
+    printf("\n\nEnter the number of digits of the elements to be generated:  ");
+    scanf(" %d", &digit_num);
+    printf("\nEnter the amount of elements to be generated:  ");
+    scanf(" %d", &elem_num);
 
-    printf("\n\nEnter the size (number of digits) of the elements to be generated:\t");
-    scanf(" %d", &element_size);
-    printf("\n\nEnter the amount of elements to be generated:\t");
-    scanf(" %d", &element_amount);
+    int *array = create_array(elem_num, digit_num);
 
-    int *array = create_array(element_size, element_amount);
+    printf("\n\nThis is our initial array...\n");
+    print_array(array, elem_num);
 
-    //Before sorting
-    print_array(array);
+    printf("\n\nSorting...");
+    radix_sort(array, elem_num, digit_num);
 
-    radix_sort(array, element_amount, element_size);
+    printf("\n\nPrinting the sorted array...\n");
+    print_array(array, elem_num);
 
-    //After sorting
-    print_array(array);
+    free(array);
+
     return 0;
 }
 
 
 //Definition
 /*
-Returns and integer array of ELEMENT_AMOUNT elements, with ELEMENT_SIZE digits each, randomly generated.  */
-int *create_array(int element_size, int element_amount)
+Creates and returns an integer array of ELEM_NUM size. Each integer has a maximum value of ((10**DIGIT_NUM) - 1).  */
+int *create_array(int elem_num, int digit_num)
 {
+    int *array = malloc(sizeof(int) * elem_num);
 
+    for (int i = 0; i < elem_num; i++)
+        {
+        array[i] = rand() % ((int)(pow(10, digit_num)));
+        }
+
+    return array;
 }
 
 
 /*
-Prints the given array in an user friendly way.  */
-void print_array(int *array)
+Prints the integer array.  */
+void print_array(int *array, int elem_num)
 {
+    printf("\n");
 
+    for(int i = 1; i <= elem_num; i++)
+        {
+        printf("%d ", array[(i - 1)]);
+
+        if ((i % 25) == 0) //Newline after 25 elements are printed
+            printf("\n");
+        }
+
+    printf("\n");
 }
 
 
 /*
-Initializes and returns a pointer to a Queue_t structure.  */
-Queue_t * create_queue(){
-    Queue_t * novaFila = malloc(sizeof(Queue_t));
-    novaFila->rear = NULL;
-    novaFila->front = NULL;
-    novaFila->length = 0;
-    return novaFila;
+Creates and returns an empty Queue_t queue.  */
+Queue_t *create_queue()
+{
+    Queue_t *new_queue = malloc(sizeof(Queue_t));
+
+    new_queue->rear = NULL;
+    new_queue->front = NULL;
+    new_queue->length = 0;
+
+    return new_queue;
 }
 
 
 /*
-Performs enqueue on a given Queue_t structure.  */
-void enqueue(Queue_t *queue, int value){
-    Node_t * novoNo = malloc(sizeof(Node_t));
-    novoNo->value = value;
-    novoNo->next = NULL;
+Enqueues NUMBER on QUEUE, creating a new node for it.  */
+void enqueue(Queue_t *queue, int number)
+{
+    Node_t * new_node = NULL;
+    new_node = malloc(sizeof(Node_t));
 
-    if(queue->front == NULL){
-        queue->front = novoNo;
-        queue->rear = novoNo;
-    }else{
-        queue->rear->next = novoNo;
-        queue->rear = novoNo;
-    }
+    new_node->number = number;
+    new_node->next_node = NULL;
+
+    if(queue->front == NULL)
+        {
+        queue->front = new_node;
+        queue->rear = new_node;
+        }
+
+    else
+        {
+        queue->rear->next_node = new_node;
+        queue->rear = new_node;
+        }
+
     queue->length++;
 }
 
 
 /*
-Performs dequeue on a given Queue_t structure.  */
-int dequeue(Queue_t *queue){
-    Node_t * removido;
-    if(queue->front != NULL){
-        removido = queue->front;
-        if(queue->rear == queue->front){
+Dequeues QUEUE, returning the removed value and freeing the node.  */
+int dequeue(Queue_t *queue)
+{
+    Node_t *removed_node;
+    int removed_number;
+
+    if(queue->front != NULL)
+        {
+        removed_node = queue->front;
+        if(queue->rear == queue->front)
+            {
             queue->front = NULL;
             queue->rear = NULL;
-        }else{
-            queue->front = queue->front->next;
-        }
-        queue->length--;
-        int valorRemovido = removido->value;
-        free(removido);
-        return valorRemovido;
-
-    }else{
-        // underflow
-    }
-}
-
-
-/*
-Prints a Queue_t structure in an user friendly way.  */
-void print_queue(Queue_t *queue){
-    Node_t * no = queue->front;
-    while(no != NULL){
-        printf("%d \n", no->value);
-        no = no->next;
-    }
-}
-
-
-/*
-Performs radix sort on a given integer array. It calls print_queue during the process to show what's
-happening.  */
-void radix_sort(int *array, int element_amount, int element_size){
-
-    Queue_t * radixVet[10];
-    for(int i = 0; i < 10; i++){
-        radixVet[i] = create_queue();
-    }
-
-    for(int i = 0; i < element_size; i++){
-        int base = pow(10, i);
-        for(int j = 0; j < element_amount; j++){
-            int radixInd = (array[j] % (base * 10)) / base;
-            enqueue(radixVet[radixInd], array[j]);
-        }
-        int vetPos = 0;
-        for(int j = 0; j < 10; j++){
-            Queue_t * fila = radixVet[j];
-            while(fila->length > 0){
-                array[vetPos] = dequeue(fila);
-                vetPos++;
             }
+        else
+            {
+            queue->front = queue->front->next_node;
+            }
+        queue->length--;
         }
-    }
+
+    else
+        {
+        printf("\nUnderflow :/\n\n");
+        exit(1);
+        }
+
+    removed_number = removed_node->number;
+    free(removed_node);  //Freeing memory
+
+    return removed_number;
+}
+
+
+/*
+Prints the queues, as specified. It's used inside radix_sort function.  */
+void print_queues()
+{
+}
+
+
+/*
+Core function. Does radix sort in an integer array of ELEM_NUM elements where each element has a maximum value of
+((10**DIGIT_NUM) - 1).  */
+void radix_sort(int *array, int elem_num, int digit_num)
+{
+    Queue_t *queue_array[10];
+    int order;
+    int index;
+    Queue_t *current_queue;
+
+    for(int i = 0; i < 10; i++)
+        {
+        queue_array[i] = create_queue();
+        }
+
+    printf("\n");
+    print_queues(); //Printing the queues, empty at this point
+
+    for(int i = 0; i < digit_num; i++)
+        {
+        order = (int)(pow(10, i));
+
+        for(int j = 0; j < elem_num; j++)
+            {
+            index = (array[j] % (order * 10)) / order;
+            enqueue(queue_array[index], array[j]);
+            }
+
+        index = 0; //Resetting the variable to use it again
+        for(int k = 0; k < 10; k++)
+            {
+            current_queue = queue_array[k];
+
+            while((current_queue->length) > 0)
+                {
+                array[index] = dequeue(current_queue);
+                index++;
+                }
+            }
+
+        print_array(array, elem_num);
+        print_queues();  //Printing the current state
+        }
+
+    for(int i = 0; i < 10; i++)  //Freeing memory
+        {
+        free(queue_array[i]);
+        }
 }
