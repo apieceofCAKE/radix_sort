@@ -41,7 +41,8 @@ void print_array(int *array, int elem_num);
 Queue_t *create_queue();
 void enqueue(Queue_t *queue, int number);
 int dequeue(Queue_t *queue);
-void print_queues();  //TO-DO
+void print_queue(Queue_t *queue);
+void print_iteration(Queue_t **queue_array);
 void radix_sort(int *array, int elem_num, int digit_num);
 
 
@@ -94,7 +95,7 @@ int *create_array(int elem_num, int digit_num)
 Prints the integer array.  */
 void print_array(int *array, int elem_num)
 {
-    printf("\nTable:\n");
+    printf("\nList:\n");
 
     for(int i = 1; i <= elem_num; i++)
         {
@@ -224,10 +225,6 @@ void radix_sort(int *array, int elem_num, int digit_num)
         }
 
     printf("\n");
-    print_array(array, elem_num);
-    print_iteration(queue_array); //Printing the queues, empty at this point
-    /*O exemplo do livro não printa as Queus antes de começar a iteração. Vamos deixar assim ou seguir o livro */
-    
 
     for(int i = 0; i < digit_num; i++)
         {
