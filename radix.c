@@ -94,7 +94,7 @@ int *create_array(int elem_num, int digit_num)
 Prints the integer array.  */
 void print_array(int *array, int elem_num)
 {
-    printf("\n");
+    printf("\nTable:\n");
 
     for(int i = 1; i <= elem_num; i++)
         {
@@ -184,9 +184,27 @@ int dequeue(Queue_t *queue)
 
 
 /*
-Prints the queues, as specified. It's used inside radix_sort function.  */
-void print_queues()
+Prints the queues, as specified. It's used inside print_iteration function.  */
+void print_queue(Queue_t *queue)
 {
+   Node_t *aux = queue->front;
+   while(aux != NULL)
+   {
+      printf("%d ", aux->number);
+      aux = aux->next_node;
+   }
+}
+
+/*
+Prints each itaration of Radix Sort. It's used inside radix_sort function. */
+void print_iteration(Queue_t **queue_array)
+{
+   for(int i = 0; i < 10; i++)
+   {
+      printf("\nQueue %d: ", i);
+      print_queue(queue_array[i]);
+      printf("\n");
+   }
 }
 
 
@@ -206,7 +224,10 @@ void radix_sort(int *array, int elem_num, int digit_num)
         }
 
     printf("\n");
-    print_queues(); //Printing the queues, empty at this point
+    print_array(array, elem_num);
+    print_iteration(queue_array); //Printing the queues, empty at this point
+    /*O exemplo do livro não printa as Queus antes de começar a iteração. Vamos deixar assim ou seguir o livro */
+    
 
     for(int i = 0; i < digit_num; i++)
         {
@@ -217,6 +238,8 @@ void radix_sort(int *array, int elem_num, int digit_num)
             index = (array[j] % (order * 10)) / order;
             enqueue(queue_array[index], array[j]);
             }
+        printf("Iteration %d: ", i+1);
+        print_iteration(queue_array); //Printing the current state of queues
 
         index = 0; //Resetting the variable to use it again
         for(int k = 0; k < 10; k++)
@@ -231,7 +254,6 @@ void radix_sort(int *array, int elem_num, int digit_num)
             }
 
         print_array(array, elem_num);
-        print_queues();  //Printing the current state
         }
 
     for(int i = 0; i < 10; i++)  //Freeing memory
