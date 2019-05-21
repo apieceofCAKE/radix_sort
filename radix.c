@@ -41,7 +41,8 @@ void print_array(int *array, int elem_num);
 Queue_t *create_queue();
 void enqueue(Queue_t *queue, int number);
 int dequeue(Queue_t *queue);
-void print_queues();  //TO-DO
+void print_queue(Queue_t *queue);
+void print_iteration(Queue_t **queue_array);
 void radix_sort(int *array, int elem_num, int digit_num);
 
 
@@ -94,7 +95,7 @@ int *create_array(int elem_num, int digit_num)
 Prints the integer array.  */
 void print_array(int *array, int elem_num)
 {
-    printf("\n");
+    printf("\nList:\n");
 
     for(int i = 1; i <= elem_num; i++)
         {
@@ -184,9 +185,27 @@ int dequeue(Queue_t *queue)
 
 
 /*
-Prints the queues, as specified. It's used inside radix_sort function.  */
-void print_queues()
+Prints the queues, as specified. It's used inside print_iteration function.  */
+void print_queue(Queue_t *queue)
 {
+   Node_t *aux = queue->front;
+   while(aux != NULL)
+   {
+      printf("%d ", aux->number);
+      aux = aux->next_node;
+   }
+}
+
+/*
+Prints each itaration of Radix Sort. It's used inside radix_sort function. */
+void print_iteration(Queue_t **queue_array)
+{
+   for(int i = 0; i < 10; i++)
+   {
+      printf("\nQueue %d: ", i);
+      print_queue(queue_array[i]);
+      printf("\n");
+   }
 }
 
 
@@ -206,7 +225,6 @@ void radix_sort(int *array, int elem_num, int digit_num)
         }
 
     printf("\n");
-    print_queues(); //Printing the queues, empty at this point
 
     for(int i = 0; i < digit_num; i++)
         {
@@ -217,6 +235,8 @@ void radix_sort(int *array, int elem_num, int digit_num)
             index = (array[j] % (order * 10)) / order;
             enqueue(queue_array[index], array[j]);
             }
+        printf("Iteration %d: ", i+1);
+        print_iteration(queue_array); //Printing the current state of queues
 
         index = 0; //Resetting the variable to use it again
         for(int k = 0; k < 10; k++)
@@ -231,7 +251,6 @@ void radix_sort(int *array, int elem_num, int digit_num)
             }
 
         print_array(array, elem_num);
-        print_queues();  //Printing the current state
         }
 
     for(int i = 0; i < 10; i++)  //Freeing memory
