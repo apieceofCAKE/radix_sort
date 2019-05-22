@@ -1,11 +1,9 @@
 /*
 Data structures class assignment. Performs radix sort on an integer array. The instructions are as follows:
-
 "Cada grupo deverá implementar um programa que recebe como entrada inteiros n e d e gera aleatoriamente
 uma lista com n elementos com exatamente d dígitos (o dígito mais significaivo pode ser zero.
 O programa deve listar os n elementos gerados e, a seguir, quando solicitado, executar a ordenação
 por distribuição.
-
 O programa deve imprimir, a cada iteração, o estado corrente das b filas, bem como o estado corrente da
 lista de elementos a ser ordenada.
     * Considerar b (base) = 10
@@ -41,13 +39,18 @@ void print_array(int *array, int elem_num);
 Queue_t *create_queue();
 void enqueue(Queue_t *queue, int number);
 int dequeue(Queue_t *queue);
-void print_queues();  //TO-DO
+void print_queue(Queue_t *queue);
+void print_iteration(Queue_t **queue_array);
 void radix_sort(int *array, int elem_num, int digit_num);
 
 
 //Main
 int main()
 {
+    printf("\n********************");
+    printf("\n\nRadix sort program. Made by:\nCaíque Evaristo\nJoão Pedro Loureiro\nMackson Mattos");
+    printf("\n\n********************");
+
     srand(time(NULL));
     int elem_num;  //Number of elements; integer array size
     int digit_num;  //Maximum number of digits of each element
@@ -59,15 +62,19 @@ int main()
 
     int *array = create_array(elem_num, digit_num);
 
+    printf("\n********************");
     printf("\n\nThis is our initial array...\n");
     print_array(array, elem_num);
 
-    printf("\n\nSorting...");
+    printf("\nSorting...\n");
+    printf("\n********************");
+
     radix_sort(array, elem_num, digit_num);
 
-    printf("\n\nPrinting the sorted array...\n");
+    printf("\nPrinting the sorted array...\n");
     print_array(array, elem_num);
 
+    printf("\nFreeing memory...\n");
     free(array);
 
     return 0;
@@ -94,7 +101,7 @@ int *create_array(int elem_num, int digit_num)
 Prints the integer array.  */
 void print_array(int *array, int elem_num)
 {
-    printf("\n");
+    printf("\nList: ");
 
     for(int i = 1; i <= elem_num; i++)
         {
@@ -184,9 +191,30 @@ int dequeue(Queue_t *queue)
 
 
 /*
-Prints the queues, as specified. It's used inside radix_sort function.  */
-void print_queues()
+Prints the queues, as specified. It's used inside print_iteration function.  */
+void print_queue(Queue_t *queue)
 {
+    Node_t *aux = queue->front;
+
+    while(aux != NULL)
+        {
+        printf("%d ", aux->number);
+        aux = aux->next_node;
+        }
+}
+
+/*
+Prints each itaration of Radix Sort. It's used inside radix_sort function. */
+void print_iteration(Queue_t **queue_array)
+{
+    for(int i = 0; i < 10; i++)
+        {
+        printf("Queue %d:\t", i);
+        print_queue(queue_array[i]);
+        printf("\n");
+        }
+
+    printf("\n********************\n");
 }
 
 
@@ -206,7 +234,6 @@ void radix_sort(int *array, int elem_num, int digit_num)
         }
 
     printf("\n");
-    print_queues(); //Printing the queues, empty at this point
 
     for(int i = 0; i < digit_num; i++)
         {
@@ -217,6 +244,10 @@ void radix_sort(int *array, int elem_num, int digit_num)
             index = (array[j] % (order * 10)) / order;
             enqueue(queue_array[index], array[j]);
             }
+
+        print_array(array, elem_num);
+        printf("\nIteration %d:\n\n", i+1);
+        print_iteration(queue_array); //Printing the current state of queues
 
         index = 0; //Resetting the variable to use it again
         for(int k = 0; k < 10; k++)
@@ -229,10 +260,7 @@ void radix_sort(int *array, int elem_num, int digit_num)
                 index++;
                 }
             }
-
-        print_array(array, elem_num);
-        print_queues();  //Printing the current state
-        }
+    }
 
     for(int i = 0; i < 10; i++)  //Freeing memory
         {
